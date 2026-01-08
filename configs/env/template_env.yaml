@@ -1,0 +1,85 @@
+# QueueTorch Environment YAML — Template (annotated)
+# Replace the angle-bracketed placeholders with your values.
+# Comments explain what each field means and valid choices.
+
+# Human-readable name of this environment
+name: "<ENV_NAME>"
+
+# Optional: logical type used to load defaults from env_data/<env_type>/
+# If network/mu/lam are null, files like <env_type>_network.npy will be used
+# Set to the same as name if you don't rely on env_data
+# env_type: "<ENV_TYPE_OR_SAME_AS_NAME>"
+
+# Arrival rate process type: one of [constant, step, sawtooth, hyper]
+lam_type: "<constant|step|sawtooth|hyper>"
+
+# Parameters for the chosen lam_type
+# For 'constant': provide per-queue rates as a list of length q
+# lam_params:
+#   val: [<LAMBDA_Q1>, <LAMBDA_Q2>, ...]
+# For 'step': two levels (val1, val2) with a time switch and random scaling
+# lam_params:
+#   t_step: <INT_EVENT_INDEX_OF_SWITCH>
+#   scale: <FLOAT_0_TO_1_RANDOM_SCALING>
+#   val1: [<LEVEL1_Q1>, <LEVEL1_Q2>, ...]
+#   val2: [<LEVEL2_Q1>, <LEVEL2_Q2>, ...]
+# For 'sawtooth': periodic alternation between val1 and val2 every t_step
+# lam_params:
+#   t_step: <INT_PERIOD_IN_EVENTS>
+#   val1: [<LEVEL1_Q1>, <LEVEL1_Q2>, ...]
+#   val2: [<LEVEL2_Q1>, <LEVEL2_Q2>, ...]
+# For 'hyper': hyper-exponential mixture (random multiplicative shocks)
+# lam_params:
+#   val: [<BASE_Q1>, <BASE_Q2>, ...]  # or null to load from env_data
+#   scale: <FLOAT_0_TO_1_RANDOM_SCALING>
+lam_params: { <SEE_ABOVE_FOR_STRUCTURE> }
+
+# Service time distribution type for all queues: one of [exp, lognormal, hyper]
+# exp = exponential(1), lognormal = lognormal(0,1) normalized, hyper = 2-phase mixture
+service_type: "<exp|lognormal|hyper>"
+
+# Server↔Queue compatibility matrix (s × q) with 1 if server i can serve queue j
+# If you want to load from env_data/<env_type>/<env_type>_network.npy, set to null
+# Example for s=2, q=3:
+# network:
+#   - [1, 0, 1]
+#   - [0, 1, 0]
+network: <SxQ_0_1_MATRIX_OR_null>
+
+# Service rate matrix μ (s × q). Use 0 where service is not allowed
+# If you want to load from env_data/<env_type>/<env_type>_mu.npy, set to null
+# Example for s=2, q=3:
+# mu:
+#   - [1.0, 0.0, 1.0]
+#   - [0.0, 0.8, 0.0]
+mu: <SxQ_NONNEGATIVE_FLOATS_OR_null>
+
+# Per-queue cost weights h (length q). Higher means the queue is penalized more
+# Example for q=3: [1.0, 2.0, 1.0]
+h: <Q_NONNEGATIVE_FLOATS>
+
+# Initial queue lengths (length q), typically nonnegative integers
+init_queues: <Q_NONNEGATIVE_INTS>
+
+# Event effect matrix on queues (rows = possible events, columns = queues)
+# If omitted, the default is [ +e_j ; -e_j ] for each queue (arrivals and services)
+# Set to 'custom' to load env_data/<env_type>/<env_type>_delta.npy
+# Or define explicitly e.g. for a tandem system with q=2:
+# queue_event_options:
+#   - [ 1.,  0.]  # arrival to queue 0
+#   - [ 0.,  0.]
+#   - [ 0.,  1.]  # arrival to queue 1 (could be near zero in lam)
+#   - [-1.,  1.]  # service in queue 0 moves job to queue 1
+#   - [ 0., -1.]  # service in queue 1 departs the system
+queue_event_options: <'custom'|EXPLICIT_EVENT_MATRIX|OMIT_FOR_DEFAULT>
+
+# Number of times to replicate the server pool block (repeats rows of network/mu)
+num_pool: <INT_>=1>
+
+# Training/Test event horizons (number of events to simulate per episode)
+train_T: <INT_NUMBER_OF_EVENTS_FOR_TRAIN>
+test_T: <INT_NUMBER_OF_EVENTS_FOR_TEST>
+
+# Optional/advanced (not used by the current loader, safe to omit)
+# scale_factor: <UNUSED_FLOAT>
+
