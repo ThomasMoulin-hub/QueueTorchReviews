@@ -69,7 +69,6 @@ class QueuingNetwork():
         else:
             self.queue_event_options = queue_event_options.float().to(self.device)
 
-        self.temp = temp
         self.eps = 1e-8
         self.inv_eps = 1/self.eps
         self.batch = batch
