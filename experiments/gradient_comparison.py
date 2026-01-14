@@ -48,12 +48,20 @@ def _compute_reinforce_grad_core(net, env_config, batch_size, T, gamma, device):
         probs = probs * dq.network
         probs = torch.minimum(probs, queues.unsqueeze(1).repeat(1, dq.s, 1))
         probs += 1 * torch.all(probs == 0., dim=2).reshape(batch_size, dq.s, 1).repeat(1, 1, dq.q) * dq.network
-        probs /= torch.sum(probs, dim=-1, keepdim=True)
+        
+        # Safe division
+        sum_probs = torch.sum(probs, dim=-1, keepdim=True)
+        sum_probs = torch.where(sum_probs == 0, torch.ones_like(sum_probs), sum_probs)
+        probs /= sum_probs
         
         dist = one_hot_sample.OneHotCategorical(probs=probs)
         action = dist.sample()
         
+        # log_prob shape is (batch_size, s) because we have independent distributions per server
         log_prob = dist.log_prob(action)
+        # Sum over servers to get total log_prob of the joint action
+        log_prob = log_prob.sum(dim=1)
+        
         log_probs.append(log_prob)
         
         obs, state, cost, event_time = dq.step(state, action)
@@ -88,7 +96,7 @@ def compute_reinforce_grad(net, env_config, batch_size, T, gamma=0.999, device='
     """
     Computes the REINFORCE gradient estimator with mini-batching to avoid OOM.
     """
-    MAX_CHUNK = int(10*500)  # Safe batch size for 16GB VRAM (conservative)
+    MAX_CHUNK = int(25*500)  # Safe batch size for 16GB VRAM (conservative)
     
     if batch_size <= MAX_CHUNK:
         return _compute_reinforce_grad_core(net, env_config, batch_size, T, gamma, device)
@@ -142,7 +150,10 @@ def compute_pathwise_grad(net, env_config, batch_size, T, device='cpu'):
         probs = probs * dq.network
         probs = torch.minimum(probs, queues.unsqueeze(1).repeat(1, dq.s, 1))
         probs += 1 * torch.all(probs == 0., dim=2).reshape(batch_size, dq.s, 1).repeat(1, 1, dq.q) * dq.network
-        probs /= torch.sum(probs, dim=-1, keepdim=True)
+        
+        sum_probs = torch.sum(probs, dim=-1, keepdim=True)
+        sum_probs = torch.where(sum_probs == 0, torch.ones_like(sum_probs), sum_probs)
+        probs /= sum_probs
         
         action = probs # Direct usage for STE
         
@@ -163,8 +174,12 @@ def compute_pathwise_grad(net, env_config, batch_size, T, device='cpu'):
     return torch.cat(grads)
 
 def cosine_similarity(g1, g2):
-    if torch.norm(g1) == 0 or torch.norm(g2) == 0:
+    norm1 = torch.norm(g1)
+    norm2 = torch.norm(g2)
+    
+    if norm1 == 0 or norm2 == 0:
         return 0.0
+        
     return F.cosine_similarity(g1.unsqueeze(0), g2.unsqueeze(0)).item()
 
 def run_experiment(args):
@@ -178,6 +193,18 @@ def run_experiment(args):
         
     with open(config_path, 'r') as f:
         env_config = yaml.safe_load(f)
+        
+    # Apply traffic intensity scaling
+    if args.intensity != 1.0:
+        print(f"Scaling traffic intensity by {args.intensity}")
+        if env_config['lam_type'] == 'constant':
+            # Scale the 'val' list
+            if 'val' in env_config['lam_params'] and env_config['lam_params']['val'] is not None:
+                original_vals = np.array(env_config['lam_params']['val'])
+                scaled_vals = original_vals * args.intensity
+                env_config['lam_params']['val'] = scaled_vals.tolist()
+        # Add handling for other lam_types if necessary (step, sawtooth, etc.)
+        # For now, assuming constant arrival rates as per typical experiments
         
     # Setup results storage
     results = []
@@ -193,13 +220,21 @@ def run_experiment(args):
             s, q = temp_dq.s, temp_dq.q
             
             net = get_policy(policy_name, s, q).to(device)
-            
+
             # Save initial state dict to reset between runs if needed (though we create new envs)
             # But we need the SAME net weights for all 3 calculations
-            
+
             # 1. Ground Truth (REINFORCE with huge batch)
             gt_grad = compute_reinforce_grad(net, env_config, batch_size=args.gt_batch, T=args.horizon, device=device)
             
+            # Check if GT gradient is zero (happens in trivial envs like MM1)
+            gt_norm = torch.norm(gt_grad).item()
+            if gt_norm == 0:
+                # print(f"Warning: Ground Truth gradient is zero for sample {i}. Skipping.")
+                # If GT is zero, similarity is undefined (or 0). 
+                # We record 0 but it might bias results if the env is trivial.
+                pass
+
             # 2. Pathwise Estimator (B=1)
             pw_grad = compute_pathwise_grad(net, env_config, batch_size=1, T=args.horizon, device=device)
             
@@ -210,11 +245,16 @@ def run_experiment(args):
             sim_pw = cosine_similarity(pw_grad, gt_grad)
             sim_rf = cosine_similarity(rf_grad, gt_grad)
             
+            # Debug print for first few samples
+            if i < 3:
+                tqdm.write(f"Sample {i}: GT_norm={gt_norm:.4f}, PW_sim={sim_pw:.4f}, RF_sim={sim_rf:.4f}")
+
             results.append({
                 'policy': policy_name,
                 'sample_idx': i,
                 'sim_pathwise': sim_pw,
-                'sim_reinforce': sim_rf
+                'sim_reinforce': sim_rf,
+                'gt_norm': gt_norm
             })
             
     # Save results
@@ -228,12 +268,13 @@ def run_experiment(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--env', type=str, default='mm1.yaml')
+    # Changed default env to criss_cross_bh.yaml which has actual routing choices
+    parser.add_argument('--env', type=str, default='criss_cross_bh.yaml')
     parser.add_argument('--device', type=str, default='cpu')
     parser.add_argument('--horizon', type=int, default=1000)
     parser.add_argument('--gt_batch', type=int, default=10000, help="Batch size for Ground Truth")
     parser.add_argument('--num_samples', type=int, default=10, help="Number of random theta samples")
     parser.add_argument('--intensity', type=float, default=1.0)
-    
+
     args = parser.parse_args()
     run_experiment(args)
