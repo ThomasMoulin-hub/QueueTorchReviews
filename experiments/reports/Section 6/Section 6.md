@@ -8,8 +8,9 @@
         ![WC_Softmax Equation](./figs_sec6/WC-Softmax_fig.png)
       
     - Code uses
-    
-      $\pi_theta(x)_{ij} = \frac{e^{v_theta (x)_{ij}}\^ x_j}{\sum_{l=1}^n e^{v_theta (x)_{il}}\^ x_l}$
+      $$
+      \pi_theta(x)_{ij} = \frac{e^{v_theta (x)_{ij}}\^ x_j}{\sum_{l=1}^n e^{v_theta (x)_{il}}\^ x_l}
+      $$
 
       if not all queues are empty; Otherwise, assign equal weights to each feasible queue.
 
