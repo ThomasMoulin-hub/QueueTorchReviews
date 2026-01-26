@@ -19,7 +19,10 @@ Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilo
         1. Different from fig 9(left) in the paper, where REINFORCE fails to learn the pattern
         2. Still shows that PATHWISE is more efficient than REINFORCE in the sense that it achieves the correct result (maybe even more significantly) with a lot fewer rollout trajectories
            
-        |![Reproduced Figure 9.1](./figs/reproduced/figure_9_1.png)| ![Paper Figure 9.1](./figs/paper/figure_9_1.png) |
+        | Reproduced Fig. 9.1 | Paper Fig. 9.1 |
+        |--------------------|---------------|
+        | <img src="./figs/reproduced/figure_9_1.png" width="300"> | <img src="./figs/paper/figure_9_1.png" width="300"> |
+
         
       - PATHWISE (B=1) v.s REINFORCE (B=1):
         
