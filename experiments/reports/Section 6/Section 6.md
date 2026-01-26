@@ -2,16 +2,15 @@
 - PPO-WC:
     - Q: Is this equation in section 6 accurate? 
         - work-conserving: assigns a probability of zero to empty queues
-            1. if $\epsilon>0$, then when all queue lengths=0, $1{x_l>0} \wedge \epsilon =0$, doesn’t prevent division by zero (0/0).
+            1. if $\epsilon>0$, then when all queue lengths=0, $1\{x_l>0\} \wedge \epsilon =0$, doesn’t prevent division by zero (0/0).
             2. if $\epsilon<0$, if only $x_j = 0$, then numerator $\pi_\theta^{WC}(x)_{ij} \wedge \epsilon \neq0$, defies WC.
                
         ![WC_Softmax Equation](./figs_sec6/WC-Softmax_fig.png)
       
     - Code uses
       $$
-      \pi_theta(x)\_{ij} = \frac{e^{v_theta(x)\_{ij}}\^ x_j}{\sum_{l=1}^n e^{v_theta (x)_{il}}\^ x_l}
+        \pi_\theta(x)_{ij}=\frac{e^{v_\theta(x)_{ij}\, x_j}}{\sum_{l=1}^n e^{v_\theta(x)_{il}}\wedge x_l}
       $$
-
       if not all queues are empty; Otherwise, assign equal weights to each feasible queue.
 
 - Setting: Reentrant_2 config file in codebase. Reentrant-1 (6 classes, 2 servers) in the paper.
