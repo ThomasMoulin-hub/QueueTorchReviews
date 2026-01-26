@@ -68,7 +68,7 @@ with open("/user/xz3355/QueueTorchReviews/cmu/pathwise_wc_cmu1_multiclass10.json
     pw10 = json.load(f)
    
 # with open("/user/xz3355/queue-learning/cmu/wc_reinforce_baseline_cmu_multiclass.json", "r") as f: 
-with open("/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu1_multiclass10.json", "r") as f:
+with open("/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu_B100_multiclass10.json", "r") as f:
     rf10 = json.load(f)
 
 pw10_results = []
@@ -137,7 +137,7 @@ for alpha, records in rf_by_alpha.items():
         linewidth=2,
         capsize=4,
         alpha=0.85,
-        label=f"REINFORCE + Value (B=10): α={alpha}"
+        label=f"REINFORCE + Value (B=100): α={alpha}"
     )
 
 # ===== 3. 图像样式 =====

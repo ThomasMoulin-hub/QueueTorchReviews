@@ -360,18 +360,18 @@ if __name__ == "__main__":
 
     num_cores = 80
     num_trials = 50
-    num_iter = 20 # 50
+    num_iter = 50 # 20
     alphas = [0.01, 0.1, 0.5, 1.0]
-    gaps = [1, 0.5, 0.1, 0.05, 0.01]
-    rho = 0.95 # 0.99
+    gaps = [1, 0.5, 0.05, 0.01]
+    rho = 0.99 # 0.95
     
-    queue_class = 10 # 5
+    queue_class = 5 # 10
     gamma = 0.99
-    reinforce_batch = 1000
+    reinforce_batch = 100
     eval_T = 20000
 
     T = 1000 # horizon N
-
+    
     #parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     #parser.add_argument('-e', type=str)
     #args = parser.parse_args()
@@ -384,18 +384,17 @@ if __name__ == "__main__":
     seeds = [int.from_bytes(os.urandom(4), 'big') for _ in range(10000)]
     # with open(f'/user/xz3355/QueueTorchReviews/cmu/seeds_cmu_5class.json', 'w') as f:
     #     json.dump(seeds, f)
-    with open(f'/user/xz3355/QueueTorchReviews/cmu/seeds_cmu_10class.json', 'r') as f:
+    with open(f'/user/xz3355/QueueTorchReviews/cmu/seeds_cmu_5class.json', 'r') as f:
         seeds = json.load(f)
     # pathwise_results = defaultdict(lambda: defaultdict(list))
     reinforce_results = defaultdict(lambda: defaultdict(list))
+    
+    with open(f'/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu_B100_{name}5.json', 'r') as f:
+        raw = json.load(f)
 
-
-    # with open(f'/user/xz3355/QueueTorchReviews/cmu/pathwise_wc_cmu_{name}10.json', 'r') as f:
-    #     raw = json.load(f)
-
-    # for k, v in raw.items():
-    #     for kk, vv in v.items():
-    #         pathwise_results[k][kk] = vv
+    for k, v in raw.items():
+        for kk, vv in v.items():
+            reinforce_results[k][kk] = vv
     
     for alpha in alphas:
         print(f'alpha: {alpha}')
@@ -446,7 +445,7 @@ if __name__ == "__main__":
             # pathwise_out = pathwise.get()
             # pathwise_results[str(alpha)][str(gap)] = pathwise_out
 
-            # with open(f'/user/xz3355/QueueTorchReviews/cmu/pathwise_wc_cmu1_{name}10.json', 'w') as f:
+            # with open(f'/user/xz3355/QueueTorchReviews/cmu/pathwise_wc_cmu_{name}5_all_eps.json', 'w') as f:
             #     json.dump(pathwise_results, f)
 
             print(f'Reinforce - {alpha} - {gap}')
@@ -457,6 +456,6 @@ if __name__ == "__main__":
             reinforce_out = reinforce.get()
             reinforce_results[str(alpha)][str(gap)] = reinforce_out
 
-            with open(f'/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu1_{name}10.json', 'w') as f:
+            with open(f'/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu_B100_{name}5_all_eps.json', 'w') as f:
                 json.dump(reinforce_results, f)
         
