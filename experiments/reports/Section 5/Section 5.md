@@ -10,18 +10,35 @@ Overall, the results validate the paper's main conclusions: the PATHWISE estimat
   - The result: PATHWISE peaks around 0.50 (for sPR) and REINFORCE is close to 0 or 0.15.
 
 ## Section 5.2
-![Reproduced Figure 9.1](./figs/reproduced/figure_9_1.png)
-![Paper Figure 9.1](./figs/paper/figure_9_1.png)
+Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilon j$, with a simple softmax policy that’s proportional to $\theta$, $\pi_\theta^{sPR}(x)_i=softmax(\theta_i)$, h = 1 for all queues. According to cmu rule, queues with a larger index should have a larger policy score $\theta_j$.
 
-![Reproduced Figure 9.2](./figs/reproduced/figure_9_2.png)
-![Paper Figure 9.2](./figs/paper/figure_9_2.png)
+- Figure 9 (Left panel):
+    - 5 classes, 50 gradient steps, alphas = [0.01, 0.1, 0.5, 1.0], results averaged over all alphas; pho = 0.99, horizon = 1000
+    - epsilon = 0.1 (as in the paper):
+      - PATHWISE (B=1) and REINFORCE (B=100) both learns the pattern ⇒ larger index, larger policy score. PATHWISE assigns strictly increasing scores (from -1.8 to +1.5) corresponding to the queue indices (1 to 5).
+        1. Different from fig 9(left) in the paper, where REINFORCE fails to learn the pattern
+        2. Still shows that PATHWISE is more efficient than REINFORCE in the sense that it achieves the correct result (maybe even more significantly) with a lot fewer rollout trajectories
+        |![Reproduced Figure 9.1](./figs/reproduced/figure_9_1.png)| ![Paper Figure 9.1](./figs/paper/figure_9_1.png) |
+      - PATHWISE (B=1) v.s REINFORCE (B=1):
+      ![Reproduced Figure 9.1.1](./figs/reproduced/figure_9_1_1.png)
+    - epsilon = 0.01, as gap gets smaller, queues are more similar to each other, thus harder to learn the correct policy:
+      - PATHWISE (B=1) and REINFORCE (B=100)
+      ![Reproduced Figure 9.1.2](./figs/reproduced/figure_9_1_2.png)
+      - PATHWISE (B=1) and REINFORCE (B=1)
+      ![Reproduced Figure 9.1.3](./figs/reproduced/figure_9_1_3.png)
+    - Conclusion: PATHWISE learns the cmu-rule better and more efficiently than REINFORCE, with results more significant for smaller gaps (harder tasks).
 
-- Left Panel (Bars - Scores $\theta_j$):
-  - Reproduction: Excellent. The figure figure_9_1.png shows that PATHWISE assigns strictly increasing scores (from -1.8 to +1.5) corresponding to the queue indices (1 to 5).
-  - Analysis: This confirms the paper's result that PATHWISE allows learning the correct priority order (the $c\mu$ rule) with a single trajectory ($B=1$), whereas REINFORCE ($B=100$ in the paper, or the orange bar) fails to establish a strict and coherent order.
-- Right Panel (Curves - Cost vs. Gap):
-  - Context: The figure figure_9_2.png differs slightly from Figure 9 (right) in the paper. The paper plots cost against learning rate (step size), whereas you plot cost against the gap size ($\epsilon$).
-  - Analysis: The results show that for harder tasks (small $\epsilon$, e.g., 0.01), costs increase, which is logical. The paper notes that PATHWISE is more robust to hyperparameters. The curves show that PATHWISE (solid lines) remains competitive and stable, validating its ability to optimize even when service differences ($\epsilon$) are minimal.
+- Figure 9 (Right panel):
+  - 10 classes, 20 gradient steps, epsilon = [0.01, 0.05, 0.1, 0.5, 1], alphas = [0.01, 0.1, 0.5, 1.0]; pho = 0.95, horizon = 1000
+  - PATHWISE(B=1) v.s. REINFORCE(B=100)
+    - No significant difference in performance of PATHWISE(B=1) & REINFORCE(B=100), unlike stated in the paper. However, reaching similar performances with much fewer trajectories still shows that PATHWISE is more efficient than REINFORCE.
+    - General trend of increasing costs for harder tasks (small $\epsilon$) is logical.
+    |![Reproduced Figure 9.2](./figs/reproduced/figure_9_2.png)| ![Paper Figure 9.2](./figs/paper/figure_9_2.png) |
+
+  - PATHWISE(B=1) v.s. REINFORCE(B=1)
+    - PATHWISE(B=1) significantly outperforms REINFORCE(B=1). PATHWISE seems more robust to hyperparameters.
+    
+  - Conclusion: the optimization performance of the PATHWISE estimator is highly similar across step-sizes, and uniformly outperforms REINFORCE with different step-sizes α.
 
 ## Section 5.3
 ![Reproduced Figure 10](./figs/reproduced/figure_11.png)
