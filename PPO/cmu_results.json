@@ -1,0 +1,1 @@
+{"reentrant_2": {"avg_cost": 17.44265365600586, "std_error": 0.26009926795959476}, "reentrant_2_hyper": {"avg_cost": 38.35642623901367, "std_error": 0.7029524803161622}, "re-reentrant_2": {"avg_cost": 17.769758224487305, "std_error": 0.27553231716156007}, "re-reentrant_2_hyper": {"avg_cost": 39.14491271972656, "std_error": 0.8328756332397461}}
