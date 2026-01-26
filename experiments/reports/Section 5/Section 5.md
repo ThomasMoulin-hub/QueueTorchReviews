@@ -23,8 +23,11 @@ Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilo
       ![Reproduced Figure 9.1.1](./figs/reproduced/figure_9_1_1.png)
     - epsilon = 0.01, as gap gets smaller, queues are more similar to each other, thus harder to learn the correct policy:
       - PATHWISE (B=1) and REINFORCE (B=100)
+
       ![Reproduced Figure 9.1.2](./figs/reproduced/figure_9_1_2.png)
+
       - PATHWISE (B=1) and REINFORCE (B=1)
+
       ![Reproduced Figure 9.1.3](./figs/reproduced/figure_9_1_3.png)
     - Conclusion: PATHWISE learns the cmu-rule better and more efficiently than REINFORCE, with results more significant for smaller gaps (harder tasks).
 
@@ -33,11 +36,13 @@ Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilo
   - PATHWISE(B=1) v.s. REINFORCE(B=100)
     - No significant difference in performance of PATHWISE(B=1) & REINFORCE(B=100), unlike stated in the paper. However, reaching similar performances with much fewer trajectories still shows that PATHWISE is more efficient than REINFORCE.
     - General trend of increasing costs for harder tasks (small $\epsilon$) is logical.
+
     |![Reproduced Figure 9.2](./figs/reproduced/figure_9_2.png)| ![Paper Figure 9.2](./figs/paper/figure_9_2.png) |
 
   - PATHWISE(B=1) v.s. REINFORCE(B=1)
     - PATHWISE(B=1) significantly outperforms REINFORCE(B=1). PATHWISE seems more robust to hyperparameters.
-    
+
+    ![Reproduced Figure 9.2_1](./figs/reproduced/figure_9_2_1.png)
   - Conclusion: the optimization performance of the PATHWISE estimator is highly similar across step-sizes, and uniformly outperforms REINFORCE with different step-sizes α.
 
 ## Section 5.3
