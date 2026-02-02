@@ -43,7 +43,7 @@ Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilo
  
     | Reproduced Fig. 9.2 | Paper Fig. 9.2 |
     |--------------------|---------------|
-    | <img src="./figs/reproduced/figure_9_2.png" width="300"> | <img src="./figs/paper/figure_9_2.png" width="300"> |
+    | <img src="./figs/reproduced/figure_9_2_100.png" width="300"> <img src="./figs/reproduced/figure_9_2.png" width="300"> | <img src="./figs/paper/figure_9_2.png" width="300"> |
 
   - PATHWISE(B=1) v.s. REINFORCE(B=1)
     - PATHWISE(B=1) significantly outperforms REINFORCE(B=1). PATHWISE seems more robust to hyperparameters.
