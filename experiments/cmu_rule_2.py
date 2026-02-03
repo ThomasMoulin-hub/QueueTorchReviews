@@ -367,7 +367,7 @@ if __name__ == "__main__":
     
     queue_class = 10
     gamma = 0.99
-    reinforce_batch = 1
+    reinforce_batch = 1000
     eval_T = 20000
 
     T = 1000 # horizon N
@@ -457,6 +457,6 @@ if __name__ == "__main__":
             reinforce_out = reinforce.get()
             reinforce_results[str(alpha)][str(gap)] = reinforce_out
 
-            with open(f'/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu_B1_{name}10.json', 'w') as f:
+            with open(f'/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu_B1000_{name}10.json', 'w') as f:
                 json.dump(reinforce_results, f)
         

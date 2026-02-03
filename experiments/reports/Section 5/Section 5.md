@@ -43,12 +43,15 @@ Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilo
  
     | Reproduced Fig. 9.2 | Paper Fig. 9.2 |
     |--------------------|---------------|
-    | <img src="./figs/reproduced/figure_9_2_100.png" width="300"> <img src="./figs/reproduced/figure_9_2.png" width="300"> | <img src="./figs/paper/figure_9_2.png" width="300"> |
+    | <img src="./figs/reproduced/figure_9_2_100.png" width="300"> | <img src="./figs/paper/figure_9_2.png" width="300"> |
 
-  - PATHWISE(B=1) v.s. REINFORCE(B=1)
+  - Different B for REINFORCE
     - PATHWISE(B=1) significantly outperforms REINFORCE(B=1). PATHWISE seems more robust to hyperparameters.
 
     ![Reproduced Figure 9.2_1](./figs/reproduced/figure_9_2_1.png)
+
+    ![Reproduced Figure 9.2_10](./figs/reproduced/figure_9_2_10.png)
+    ![Reproduced Figure 9.2_1000](./figs/reproduced/figure_9_2_1000.png)
     
   - Conclusion: the optimization performance of the PATHWISE estimator is highly similar across step-sizes, and uniformly outperforms REINFORCE with different step-sizes α.
 
