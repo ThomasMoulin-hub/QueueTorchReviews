@@ -35,12 +35,27 @@ NUM_CORES = min(80, os.cpu_count() or 40)
 NUM_TRIALS = 100
 TRIAL_OFFSET = 0
 EVAL_T = 20000
-NUM_ITER = 20
+NUM_ITER = 100
 RHO = 0.95
 QUEUE_CLASS = 10
 T = 1000
 GAMMA = 0.99
 REINFORCE_BATCH = 100
+
+# Only run these rules (subset of STEP_RULES)
+RUN_RULES = {
+    'normalized_fixed': STEP_RULES['normalized_fixed'],
+    'adam':             STEP_RULES['adam'],
+    'rmsprop':         STEP_RULES['rmsprop'],
+}
+RUN_ALPHAS = {
+    'normalized_fixed': STEP_RULE_ALPHAS['normalized_fixed'],
+    'adam':             STEP_RULE_ALPHAS['adam'],
+    'rmsprop':         STEP_RULE_ALPHAS['rmsprop'],
+}
+
+# Output filename tag to avoid overwriting K=20 results
+FILE_TAG = f'K{NUM_ITER}'
 
 
 class ValueNet(nn.Module):
@@ -244,8 +259,8 @@ def run_all_step_rules(seeds):
 
     # Build list of (rule_name, alpha, gap) combos
     combos = []
-    for rule_name in STEP_RULES:
-        alphas = STEP_RULE_ALPHAS[rule_name]
+    for rule_name in RUN_RULES:
+        alphas = RUN_ALPHAS[rule_name]
         for alpha in alphas:
             for gap in GAPS:
                 combos.append((rule_name, alpha, gap))
@@ -254,8 +269,8 @@ def run_all_step_rules(seeds):
     total_jobs = total_combos * NUM_TRIALS
 
     print(f"{'='*60}", flush=True)
-    print(f"Step Rules Experiment (REINFORCE)", flush=True)
-    print(f"  Rules: {list(STEP_RULES.keys())}", flush=True)
+    print(f"Step Rules Experiment (REINFORCE, {FILE_TAG})", flush=True)
+    print(f"  Rules: {list(RUN_RULES.keys())}", flush=True)
     print(f"  {total_combos} combos x {NUM_TRIALS} trials = {total_jobs} total jobs", flush=True)
     print(f"  Using {NUM_CORES} cores", flush=True)
     print(f"{'='*60}", flush=True)
@@ -291,7 +306,7 @@ def run_all_step_rules(seeds):
             completed_combos += 1
 
             # Save incremental results for this rule
-            out_path = os.path.join(CMU_DIR, f'reinforce_step_rule_{rule_name}.json')
+            out_path = os.path.join(CMU_DIR, f'reinforce_step_rule_{rule_name}_{FILE_TAG}.json')
             with open(out_path, 'w') as f:
                 json.dump(per_rule[rule_name], f)
 

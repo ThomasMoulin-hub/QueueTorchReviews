@@ -168,7 +168,7 @@ STEP_RULES = {
     # 'normalized_polyak':      NormalizedPolyak,
     'adam':                    Adam,
     # 'adagrad':                Adagrad,
-    # 'rmsprop':                RMSProp,
+    'rmsprop':                RMSProp,
     # 'amsgrad':                AMSGrad,
     # 'unnormalized_fixed':     UnnormalizedFixed,
 }
