@@ -358,11 +358,11 @@ def reinforce_value_cmu(env_config, seed, num_iter, alpha,  T = 1000, gamma = 0.
 
 if __name__ == "__main__":
 
-    num_cores = 80
-    num_trials = 50
+    num_cores = 100
+    num_trials = 950
     num_iter = 50 # 20
     alphas = [0.01, 0.1, 0.5, 1.0]
-    gaps = [1, 0.5, 0.05, 0.01]
+    gaps = [1, 0.5, 0.05, 0.01] # [1, 0.5, 0.1, 0.05, 0.01]
     rho = 0.99 # 0.95
     
     queue_class = 5 # 10
@@ -381,20 +381,21 @@ if __name__ == "__main__":
 
     name = env_config['name']
 
-    seeds = [int.from_bytes(os.urandom(4), 'big') for _ in range(10000)]
+    # seeds = [int.from_bytes(os.urandom(4), 'big') for _ in range(10000)]
     # with open(f'/user/xz3355/QueueTorchReviews/cmu/seeds_cmu_5class.json', 'w') as f:
     #     json.dump(seeds, f)
     with open(f'/user/xz3355/QueueTorchReviews/cmu/seeds_cmu_5class.json', 'r') as f:
         seeds = json.load(f)
-    # pathwise_results = defaultdict(lambda: defaultdict(list))
-    reinforce_results = defaultdict(lambda: defaultdict(list))
     
-    with open(f'/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu_B100_{name}5.json', 'r') as f:
-        raw = json.load(f)
+    reinforce_results = defaultdict(lambda: defaultdict(list))
 
-    for k, v in raw.items():
-        for kk, vv in v.items():
-            reinforce_results[k][kk] = vv
+
+    # with open(f'/user/xz3355/QueueTorchReviews/cmu/pathwise_wc_cmu_{name}10.json', 'r') as f:
+    #     raw = json.load(f)
+
+    # for k, v in raw.items():
+    #     for kk, vv in v.items():
+    #         pathwise_results[k][kk] = vv
     
     for alpha in alphas:
         print(f'alpha: {alpha}')
@@ -414,17 +415,8 @@ if __name__ == "__main__":
             env_config['lam_params']['val'] = np.repeat(rho/np.sum(1/env_config['mu']), queue_class)
             
             # Do jobs
-            # pathwise_jobs = []
             reinforce_jobs = []
-            for i in range(num_trials):
-                
-                # pathwise_jobs.append({
-                #         'env_config': env_config,
-                #         'temp': 1e-6,
-                #         'seed': seeds[i], 
-                #         'num_iter': num_iter,
-                #         'alpha': alpha,
-                #         'eval_T': eval_T})
+            for i in range(50, 50+num_trials):
                 
                 reinforce_jobs.append({
                         'env_config': env_config,
@@ -435,18 +427,7 @@ if __name__ == "__main__":
                         'batch': reinforce_batch,
                         'eval_T': eval_T})
 
-            # pathwise_cmu_mp = lambda x: pathwise_cmu(**x)
             reinforce_cmu_mp = lambda x: reinforce_value_cmu(**x)
-
-            # print(f'Pathwise - {alpha} - {gap}')
-            # with mp.ProcessingPool(num_cores) as pool:
-            #     pathwise = pool.amap(pathwise_cmu_mp, pathwise_jobs)
-
-            # pathwise_out = pathwise.get()
-            # pathwise_results[str(alpha)][str(gap)] = pathwise_out
-
-            # with open(f'/user/xz3355/QueueTorchReviews/cmu/pathwise_wc_cmu_{name}5_all_eps.json', 'w') as f:
-            #     json.dump(pathwise_results, f)
 
             print(f'Reinforce - {alpha} - {gap}')
             reinforce = []
@@ -456,6 +437,6 @@ if __name__ == "__main__":
             reinforce_out = reinforce.get()
             reinforce_results[str(alpha)][str(gap)] = reinforce_out
 
-            with open(f'/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu_B100_{name}5_all_eps.json', 'w') as f:
+            with open(f'/user/xz3355/QueueTorchReviews/cmu/wc_reinforce_baseline_cmu_B100_{name}5_all_eps_950_more_runs.json', 'w') as f:
                 json.dump(reinforce_results, f)
         

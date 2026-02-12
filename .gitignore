@@ -1,0 +1,19 @@
+# Core dumps
+core
+
+# HPC job output files (PBS/SGE/Slurm)
+python.e*
+python.o*
+python.pe*
+python.po*
+python3.e*
+python3.o*
+python3.pe*
+python3.po*
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Claude
+claude
