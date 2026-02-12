@@ -61,13 +61,6 @@ Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilo
 
 Setting: 5 queue classes, 50 gradient steps, alphas = [0.01, 0.1, 0.5, 1.0], rho = 0.99, horizon = 1000. The cmu rule prescribes that queue j (with service rate $\mu_{1j} = 1 + \epsilon j$) should receive a strictly increasing policy score $\theta_j$: prioritize faster-service queues more.
 
-<img src="../../../cmu/Fig9_1_errorbars.png" width="800">
-
-- **Pooled results (95% CI, 4000 runs per panel):**
-  - **$\epsilon = 1$ (easy):** Both PATHWISE (B=1) and REINFORCE (B=100) learn the correct strictly increasing pattern from $\theta_1 \approx -3$ to $\theta_5 \approx +2$. PATHWISE produces a wider separation between queue scores (range $\approx$ 6 units) than REINFORCE (range $\approx$ 5 units), indicating a more confident learned policy. Error bars are narrow ($\pm$ 0.1), confirming high stability across 4000 independent runs.
-  - **$\epsilon = 0.5$ (moderate):** The monotonically increasing pattern is still clearly learned by both methods. The magnitude shrinks slightly (range $\approx$ 5 for PW, $\approx$ 4 for RF). Error bars remain tight.
-  - **$\epsilon = 0.01$ (hard):** The gap between service rates is nearly zero, making it extremely difficult to distinguish queue priorities. Both methods show near-zero scores for all queues ($|\theta_j| < 0.3$), but a faint increasing trend is still visible. Error bars are wider relative to the signal, indicating the optimization outcome is noisier at small gaps.
-  - **Key finding:** Even at $\epsilon = 0.01$, PATHWISE with B=1 matches REINFORCE with B=100 using 100x fewer trajectories per gradient step. The 95% confidence intervals never overlap between adjacent queues for $\epsilon \geq 0.5$, providing strong statistical evidence that both methods learn the correct ordering.
 
 <img src="../../../cmu/Fig9_1_per_alpha.png" width="800">
 
@@ -153,9 +146,7 @@ Setting: 10 queue classes, baseline = {K=20 gradient steps, T=1000 horizon, $\rh
 - **Queue Classes n:** At n=5, PATHWISE outperforms clearly at $\epsilon=1$ (ratio ~0.975). At n=20, performance is essentially identical.
 - **Overall conclusion:** The PW/RF cost ratio never deviates more than ~2.5% from parity. This confirms that PATHWISE(B=1) matches REINFORCE(B=100) across all tested hyperparameter settings, while using 100x fewer trajectories per gradient step. The paper's claim of PATHWISE superiority in optimization cost is best interpreted as a *sample efficiency* advantage rather than an absolute cost advantage: both methods converge to similar policies, but PATHWISE gets there with far less simulation data.
 
-### Response to Figure 9.2 Concern: Degradation at Small $\epsilon$ and Step Rule Analysis
-
-> *"These results are concerning. It appears that the degradation of performance is similar across REINFORCE and PATHWISE as epsilon becomes smaller. Could you run ablations on the gradient steps, rho, horizon, and classes to see if this trend persists? It'll be important to understand what's going on here. If you haven't tried, please consider a) applying adaptive step size rules or b) normalizing the gradients and then applying a range of step sizes?"*
+### Step Rule Analysis
 
 #### 1. The degradation at small $\epsilon$ is a problem-structural effect, not an optimizer failure
 
