@@ -1,8 +1,10 @@
 # Validation of Pathwise Estimators in DDES Gradient Analysis
 Overall, the results validate the paper's main conclusions: the PATHWISE estimator offers better estimation quality and scalability than REINFORCE or SPSA, although the absolute values sometimes differ.
 ## Section 5.1
-![Reproduced Figure 8](./figs/reproduced/figure_8.png)
-![Paper Figure 8](./figs/paper/figure_8.png)
+  | Reproduced Fig. 8 | Paper Fig. 8 |
+  |--------------------|---------------|
+  | <img src="./figs/reproduced/figure_8.png" width="450"> | <img src="./figs/paper/figure_8.png" width="600"> |
+
 - Comparison
   - Trend: The results faithfully reproduce the performance hierarchy of the paper. The PATHWISE estimator (blue) consistently achieves higher cosine similarity with the "true" gradient than REINFORCE (red/orange) across all three policies (sMP, sMW, sPR).
   - Magnitude: There is a notable difference in absolute values.
@@ -26,7 +28,7 @@ Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilo
         
       - PATHWISE (B=1) v.s REINFORCE (B=1):
         
-      ![Reproduced Figure 9.1.1](./figs/reproduced/figure_9_1_1.png)
+        <img src="./figs/reproduced/figure_9_1_1.png" width="400">
       
     - epsilon = 0.01, as gap gets smaller, queues are more similar to each other, thus harder to learn the correct policy:
         | PATHWISE (B=1) and REINFORCE (B=100) | PATHWISE (B=1) and REINFORCE (B=1) |
@@ -48,10 +50,9 @@ Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilo
   - Different B for REINFORCE
     - PATHWISE(B=1) significantly outperforms REINFORCE(B=1). PATHWISE seems more robust to hyperparameters.
 
-    ![Reproduced Figure 9.2_1](./figs/reproduced/figure_9_2_1.png)
-
-    ![Reproduced Figure 9.2_10](./figs/reproduced/figure_9_2_10.png)
-    ![Reproduced Figure 9.2_1000](./figs/reproduced/figure_9_2_1000.png)
+    <img src="./figs/reproduced/figure_9_2_1.png" width="300">
+    <img src="./figs/reproduced/figure_9_2_10.png" width="300">
+    <img src="./figs/reproduced/figure_9_2_1000.png" width="300">
     
   - Conclusion: the optimization performance of the PATHWISE estimator is highly similar across step-sizes, and uniformly outperforms REINFORCE with different step-sizes α.
 
@@ -64,76 +65,17 @@ Setting: 5 queue classes, 50 gradient steps, alphas = [0.01, 0.1, 0.5, 1.0], rho
 
 <img src="../../../cmu/Fig9_1_per_alpha.png" width="800">
 
-- **Per-alpha breakdown ($\pm$ 1 std, 1000 runs per cell):**
-  - **$\alpha = 0.01$ (small step):** Both methods learn the correct ordering, but the absolute scale of $\theta_j$ is small (range $\approx$ 0.3). The gradient does not move the parameters far from initialization. Differences between PW and RF are negligible.
-  - **$\alpha = 0.1$:** The pattern becomes more pronounced (range $\approx$ 3). PW shows a wider spread than RF, confirming stronger gradient signal utilization. Error bars are moderate.
-  - **$\alpha = 0.5$ and $\alpha = 1.0$ (large steps):** The learned policy scores are most pronounced (range $\approx$ 6-12 for PW). PATHWISE consistently produces larger score separations than REINFORCE, and error bars grow with alpha (larger step-size causes more variance across runs).
-  - **$\epsilon = 0.01$ column:** At the hardest gap, $\alpha = 0.01$ and $\alpha = 0.1$ fail to produce any discernible pattern (flat bars). Only at $\alpha = 0.5$ and $\alpha = 1.0$ is there a weak but visible monotone trend for PATHWISE, while REINFORCE error bars are large enough to swallow the signal entirely. This shows that PATHWISE better exploits large learning rates for hard problems.
+- Both methods seem to learn the correct ordering, with the pattern more pronounced for easier tasks (larger $\epsilon$). Although PATHWISE being able to learn the correct ordering with only 1 rollout while REINFORCE needs 100, means PATHWISE is more efficient.
 
 ### Figure 9.2 Ablation Studies (10-class, 100 runs x 4 alphas per setting)
 
 Setting: 10 queue classes, baseline = {K=20 gradient steps, T=1000 horizon, $\rho$=0.95, n=10 classes}. Each ablation varies one hyperparameter while holding the rest at baseline. PATHWISE uses B=1, REINFORCE uses B=100 with a learned value baseline. Results are averaged across all 4 alphas (400 runs per gap value per ablation setting).
 
-#### Ablation 1: Simulation Horizon T
-
-| | $\epsilon=1$ (easy) | $\epsilon=0.05$ | $\epsilon=0.01$ (hard) |
-|---|---|---|---|
-| **PW, T=500** | 10.90 | 16.54 | 18.04 |
-| **PW, T=5000** | 10.76 | 15.97 | 17.84 |
-| **RF, T=500** | 10.94 | 16.45 | 18.00 |
-| **RF, T=5000** | 10.84 | 15.93 | 17.84 |
-
-<img src="../../../cmu/ablation_by_gap.png" width="700">
-
-- Increasing T from 500 to 5000 yields a modest improvement of ~0.2 cost units across all gaps. The benefit is slightly larger at intermediate gaps ($\epsilon = 0.05$: ~0.6 unit reduction for PW).
-- PATHWISE and REINFORCE respond nearly identically to changes in T, with their cost curves overlapping within error bars for all horizon values.
-- **Conclusion:** Longer horizons help marginally by providing a more accurate cost estimate per gradient step, but the returns are strongly diminishing. T=1000 (baseline) is already a good operating point. This is expected since the steady-state cost estimator converges quickly.
-
-#### Ablation 2: Number of Gradient Steps K
-
-| | $\epsilon=1$ | $\epsilon=0.05$ | $\epsilon=0.01$ |
-|---|---|---|---|
-| **PW, K=10** | 10.87 | 16.53 | 18.03 |
-| **PW, K=100** | 10.77 | 16.06 | 17.93 |
-| **RF, K=10** | 10.89 | 16.28 | 18.10 |
-| **RF, K=100** | 10.89 | 16.00 | 17.87 |
-
-- Increasing K from 10 to 100 primarily benefits intermediate-to-hard gaps ($\epsilon \leq 0.05$), reducing PW cost by ~0.5 at $\epsilon=0.05$. At $\epsilon=1$ (easy), even K=10 is sufficient and more iterations provide negligible improvement.
-- REINFORCE benefits similarly from more iterations at hard gaps but shows slightly less improvement at $\epsilon=1$ (essentially flat from K=10 to K=100).
-- **Conclusion:** For easy problems, K=10-20 is sufficient. For hard problems ($\epsilon \leq 0.05$), more gradient steps (K=50-100) provide meaningful improvement, with PATHWISE extracting slightly more value from additional iterations.
-
-#### Ablation 3: Traffic Intensity $\rho$
-
-| | $\epsilon=1$ | $\epsilon=0.05$ | $\epsilon=0.01$ |
-|---|---|---|---|
-| **PW, $\rho$=0.9** | 5.76 | 8.11 | 8.80 |
-| **PW, $\rho$=0.95** | 10.81 | 16.30 | 17.97 |
-| **PW, $\rho$=0.99** | 27.25 | 46.40 | 52.29 |
-| **RF, $\rho$=0.9** | 5.81 | 8.12 | 8.83 |
-| **RF, $\rho$=0.95** | 10.88 | 16.13 | 17.93 |
-| **RF, $\rho$=0.99** | 27.27 | 45.67 | 51.92 |
-
 <img src="../../../cmu/ablation_eps_vs_cost.png" width="700">
 
-- Traffic intensity has by far the largest effect on absolute cost. At $\rho=0.99$ (near-critical load), costs are ~5-6x higher than at $\rho=0.9$, reflecting the well-known heavy-traffic scaling of queueing systems.
-- Both methods scale identically with $\rho$. At $\rho=0.99$, REINFORCE achieves a marginally lower cost than PATHWISE at $\epsilon=0.05$ (45.67 vs 46.40), which may reflect the value baseline helping more when the cost landscape is steep.
-- **Conclusion:** The relative performance of PATHWISE vs REINFORCE is stable across traffic intensities. Neither method breaks down at high load -- the cost increase is due to the physics of the queueing system, not optimizer failure.
+- Traffic intensity and number of classes have the largest effect on average cost.
+- However, all these hyperparameter settings don't change the fact that performance degradation is similar across PATHWISE and REINFORCE. The two basically achieve the same performance.
 
-#### Ablation 4: Number of Queue Classes n
-
-| | $\epsilon=1$ | $\epsilon=0.05$ | $\epsilon=0.01$ |
-|---|---|---|---|
-| **PW, n=5** | 12.76 | 17.61 | 18.23 |
-| **PW, n=10** | 10.81 | 16.30 | 17.97 |
-| **PW, n=20** | 9.33 | 14.88 | 17.69 |
-| **RF, n=5** | 13.09 | 17.39 | 18.16 |
-| **RF, n=10** | 10.88 | 16.13 | 17.93 |
-| **RF, n=20** | 9.38 | 14.71 | 17.76 |
-
-- Increasing the number of queue classes from 5 to 20 actually *reduces* average holding cost at large gaps ($\epsilon = 1$: from 12.76 to 9.33 for PW). This is because with more classes and $\mu_{1j} = 1 + \epsilon j$, the highest-indexed queues have very fast service rates, pulling down the overall average cost.
-- At $\epsilon = 0.01$ (hard), all queue classes have nearly identical service rates regardless of n, so the problem dimension has little effect (18.23 for n=5 vs 17.69 for n=20).
-- PATHWISE shows a small but consistent edge over REINFORCE at n=5 for the easy gap ($\epsilon=1$: 12.76 vs 13.09), but at n=20 they are essentially tied.
-- **Conclusion:** Both methods scale gracefully to 20 queue classes. Importantly, PATHWISE does not degrade relative to REINFORCE as dimensionality increases, consistent with the paper's broader claim that pathwise gradients scale better than score-function estimators.
 
 #### Cost Ratio Analysis (Pathwise / REINFORCE)
 
@@ -145,32 +87,8 @@ Setting: 10 queue classes, baseline = {K=20 gradient steps, T=1000 horizon, $\rh
 - **Traffic Intensity $\rho$:** At $\rho=0.99$ and $\epsilon=0.05$, REINFORCE gains a marginal edge (ratio ~1.015), suggesting the value baseline is useful at high load for medium-difficulty problems.
 - **Queue Classes n:** At n=5, PATHWISE outperforms clearly at $\epsilon=1$ (ratio ~0.975). At n=20, performance is essentially identical.
 - **Overall conclusion:** The PW/RF cost ratio never deviates more than ~2.5% from parity. This confirms that PATHWISE(B=1) matches REINFORCE(B=100) across all tested hyperparameter settings, while using 100x fewer trajectories per gradient step. The paper's claim of PATHWISE superiority in optimization cost is best interpreted as a *sample efficiency* advantage rather than an absolute cost advantage: both methods converge to similar policies, but PATHWISE gets there with far less simulation data.
-
-### Step Rule Analysis
-
-#### 1. The degradation at small $\epsilon$ is a problem-structural effect, not an optimizer failure
-
-The cost increase as $\epsilon \to 0$ is **consistent across all ablation axes, all step rules, and both gradient estimators.** Across all 4 alphas, both PATHWISE and REINFORCE see costs increase by a factor of ~1.6x from $\epsilon=1$ to $\epsilon=0.01$:
-
-| Method | $\alpha=0.01$ | $\alpha=0.1$ | $\alpha=0.5$ | $\alpha=1.0$ |
-|---|---|---|---|---|
-| PW baseline | 1.66x | 1.67x | 1.65x | 1.65x |
-| RF (B=100) | 1.64x | 1.65x | 1.64x | 1.60x |
-
-This factor is **remarkably stable** across all settings, which points to a structural explanation: when $\epsilon \to 0$, the service rates $\mu_{1j} = 1 + \epsilon j$ become nearly identical. The optimal c$\mu$-rule still prescribes different priorities, but the *benefit* of the correct ordering shrinks — the gap between the optimal policy cost and the uniform-scheduling cost narrows. In the limit $\epsilon = 0$, all queues are identical and scheduling order is irrelevant. The cost increase we observe is not a failure to learn the right policy; it is that the right policy provides less benefit.
-
-The ablation studies confirm this interpretation:
-
-- **Horizon T (500–5000):** Costs at $\epsilon=0.01$ decrease by only ~0.2 units as T grows from 500 to 5000. Longer simulations give slightly better gradient estimates, but the fundamental cost floor is unchanged. PW and RF respond identically.
-- **Gradient steps K (10–100):** More iterations help moderately at intermediate gaps ($\epsilon=0.05$: ~0.5 cost reduction from K=10 to K=100), but at $\epsilon=0.01$ the improvement is minimal (~0.1-0.2 units). The policy converges quickly because there is little to learn.
-- **Traffic intensity $\rho$ (0.9–0.99):** Higher load amplifies costs dramatically (5-6x from $\rho=0.9$ to $\rho=0.99$), but the *relative* degradation pattern at small $\epsilon$ is preserved. The PW/RF ratio stays within [0.985, 1.015] across all $\rho$ values.
-- **Queue classes n (5–20):** More queues do not change the picture. At $\epsilon=0.01$, costs converge regardless of n (18.23 for n=5 vs 17.69 for n=20), because all service rates are nearly equal.
-
-<img src="../../../cmu/ablation_eps_vs_cost.png" width="700">
-
-<img src="../../../cmu/ablation_eps_vs_ratio.png" width="700">
-
-#### 2. Adaptive step size rules (Adam, RMSProp, Adagrad, AMSGrad)
+  
+### Adaptive step size rules (Adam, RMSProp, Adagrad, AMSGrad)
 
 We tested 8 step rules across both gradient-normalized and adaptive families, each with 4 learning rates, 4 gap values, and 100 independent trials (K=20 gradient steps). The following table shows per-alpha costs at $\epsilon=0.01$ (the hardest regime):
 
