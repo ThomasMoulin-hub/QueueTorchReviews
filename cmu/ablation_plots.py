@@ -179,25 +179,34 @@ for row, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
             pw_data = load_ablation('pathwise', axis_name, val)
             rf_data = load_ablation('reinforce', axis_name, val)
 
-            pw_means, pw_ci, rf_means, rf_ci = [], [], [], []
+            pw_means, pw_std, rf_means, rf_std = [], [], [], []
             for gap in GAPS:
                 pw_c = np.array([r['avg_cost'] for r in pw_data[alpha][gap]])
                 rf_c = np.array([r['avg_cost'] for r in rf_data[alpha][gap]])
                 pw_means.append(np.mean(pw_c))
-                pw_ci.append(1.96 * np.std(pw_c) / np.sqrt(len(pw_c)))
+                pw_std.append(np.std(pw_c))
                 rf_means.append(np.mean(rf_c))
-                rf_ci.append(1.96 * np.std(rf_c) / np.sqrt(len(rf_c)))
+                rf_std.append(np.std(rf_c))
+
+            pw_means = np.array(pw_means)
+            pw_std = np.array(pw_std)
+            rf_means = np.array(rf_means)
+            rf_std = np.array(rf_std)
 
             lbl = AXIS_VAL_FMT[axis_name](val)
             is_baseline = (val == BASELINE[axis_name])
             lw_pw = 2.5 if is_baseline else 1.5
 
-            ax.errorbar(x_pos, pw_means, yerr=pw_ci, marker='s', linestyle='-',
-                        linewidth=lw_pw, capsize=3, color=colors[vi],
-                        label=f'PW {lbl}' if col == 0 else None)
-            ax.errorbar(x_pos, rf_means, yerr=rf_ci, marker='o', linestyle='--',
-                        linewidth=lw_pw * 0.7, capsize=3, color=colors[vi], alpha=0.7,
-                        label=f'RF {lbl}' if col == 0 else None)
+            ax.plot(x_pos, pw_means, marker='s', linestyle='-',
+                    linewidth=lw_pw, color=colors[vi],
+                    label=f'PW {lbl}' if col == 0 else None)
+            ax.fill_between(x_pos, pw_means - pw_std, pw_means + pw_std,
+                            color=colors[vi], alpha=0.15)
+            ax.plot(x_pos, rf_means, marker='o', linestyle='--',
+                    linewidth=lw_pw * 0.7, color=colors[vi], alpha=0.7,
+                    label=f'RF {lbl}' if col == 0 else None)
+            ax.fill_between(x_pos, rf_means - rf_std, rf_means + rf_std,
+                            color=colors[vi], alpha=0.08)
 
         ax.set_xticks(x_pos)
         ax.set_xticklabels([str(g) for g in GAPS_FLOAT], fontsize=8)
@@ -214,7 +223,7 @@ for row, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
 
 fig.suptitle(
     'Per-α Ablation: Pathwise (solid) vs REINFORCE (dashed)\n'
-    'Rows = ablation axis, Columns = learning rate α',
+    r'Rows = ablation axis, Columns = learning rate α  (shaded = ±1 std dev)',
     fontsize=15, y=1.01
 )
 plt.tight_layout()
