@@ -12,7 +12,7 @@ Overall, the results validate the paper's main conclusions: the PATHWISE estimat
   - The result: PATHWISE peaks around 0.50 (for sPR) and REINFORCE is close to 0 or 0.15.
 
 ## Section 5.2
-Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilon j$, with a simple softmax policy that’s proportional to $\theta$, $\pi_\theta^{sPR}(x)_i=softmax(\theta_i)$, h = 1 for all queues. According to cmu rule, queues with a larger index should have a larger policy score $\theta_j$.
+Setting: PATHWISE v.s. REINFORCE, multi-class single-server, $\mu_{1j}=1+\epsilon j$, with a simple softmax policy that’s proportional to $\theta$, $\pi_\theta^{sPR}(x)_i=softmax(\theta_i)$, h = 1 for all queues. According to cmu rule, queues with a larger index should have a larger policy score $\theta_j$. These results are already using normalized gradients with a fixed step size.
 
 - Figure 9 (Left panel):
     - 5 classes, 50 gradient steps, alphas = [0.01, 0.1, 0.5, 1.0], results averaged over all alphas; pho = 0.99, horizon = 1000
@@ -76,17 +76,17 @@ Setting: 10 queue classes, baseline = {K=20 gradient steps, T=1000 horizon, $\rh
 - Traffic intensity and number of classes have the largest effect on average cost.
 - However, all these hyperparameter settings don't change the fact that performance degradation is similar across PATHWISE and REINFORCE. The two basically achieve the same performance.
   
-### Adaptive step size rules (Adam, RMSProp, Adagrad, AMSGrad)
+### Adaptive/Normalized step size rules
 
-Tested 7 step rules across both gradient-normalized and adaptive families, each with 4 learning rates, 4 gap values, and 100 independent trials (K=20 & 100 gradient steps). 
+Tested 8 step rules across both gradient-normalized and adaptive families, each with 4 learning rates, 4 gap values, and 100 independent trials (K=20 & 100 gradient steps). 
 
 <img src="../../../cmu/step_rule_per_rule.png" width="800">
 
 <img src="../../../cmu/step_rule_K100_per_rule.png" width="800">
 
-**Key finding:** At each alpha, PW (solid) and RF (dashed) are nearly indistinguishable, with no step rule producing a meaningful separation:
+At each alpha, PATHWISE (solid) and REINFORCE (dashed) are nearly indistinguishable, with no step rule producing a meaningful separation:
 
-**The performance degradation as $\epsilon$ gets smaller remains.** Neither more gradient steps (K=20→100), nor adaptive optimizers (Adam, RMSProp), nor gradient normalization (fixed, diminishing, Polyak) reduce the ~1.65x cost factor from $\epsilon=1$ to $\epsilon=0.01$. Almost the same for PATHWISE and REINFORCE.
+The performance degradation as $\epsilon$ decreases remains similar for both PATHWISE and REINFORCE. PATHWISE appears slightly more robust to changes in $\epsilon$ when using Adam and RMSProp, but tends to perform slightly worse than REINFORCE on easier tasks.
 
 
 ## Section 5.3
