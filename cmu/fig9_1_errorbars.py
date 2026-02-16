@@ -39,7 +39,7 @@ N_QUEUES = 5
 # ─────────────────────────────────────────────────────────────────
 # Figure 1: Multi-panel Fig 9.1 — one subplot per ε
 #   Bar chart: policy score θ_j per queue, PW vs RF
-#   Error bars: 95% CI across all runs (pooled over alphas)
+#   Error bars: ±1 std dev across all runs (pooled over alphas)
 # ─────────────────────────────────────────────────────────────────
 fig, axes = plt.subplots(1, len(GAPS), figsize=(4.2 * len(GAPS), 5), sharey=True)
 
@@ -61,9 +61,9 @@ for gi, gap in enumerate(GAPS):
     rf_iterates = np.array(rf_iterates)
 
     pw_mean = np.mean(pw_iterates, axis=0)
-    pw_ci = 1.96 * np.std(pw_iterates, axis=0) / np.sqrt(len(pw_iterates))
+    pw_ci = np.std(pw_iterates, axis=0)
     rf_mean = np.mean(rf_iterates, axis=0)
-    rf_ci = 1.96 * np.std(rf_iterates, axis=0) / np.sqrt(len(rf_iterates))
+    rf_ci = np.std(rf_iterates, axis=0)
 
     x = np.arange(N_QUEUES)
     width = 0.35
@@ -88,7 +88,7 @@ for gi, gap in enumerate(GAPS):
 
 fig.suptitle(
     'Fig 9.1 — Learned Policy Scores by Queue (5-class)\n'
-    'Error bars = 95% CI across 1000 independent runs × 4 learning rates',
+    'Error bars = ±1 std dev across 1000 independent runs × 4 learning rates',
     fontsize=13, y=1.03,
 )
 plt.tight_layout()
@@ -171,7 +171,7 @@ for alpha in ALPHAS:
         if gap in pw[alpha]:
             pw_costs = np.array([r['avg_cost'] for r in pw[alpha][gap]])
             pw_means.append(np.mean(pw_costs))
-            pw_ci.append(1.96 * np.std(pw_costs) / np.sqrt(len(pw_costs)))
+            pw_ci.append(np.std(pw_costs))
         else:
             pw_means.append(np.nan)
             pw_ci.append(0)
@@ -179,7 +179,7 @@ for alpha in ALPHAS:
         if gap in rf[alpha]:
             rf_costs = np.array([r['avg_cost'] for r in rf[alpha][gap]])
             rf_means.append(np.mean(rf_costs))
-            rf_ci.append(1.96 * np.std(rf_costs) / np.sqrt(len(rf_costs)))
+            rf_ci.append(np.std(rf_costs))
         else:
             rf_means.append(np.nan)
             rf_ci.append(0)
@@ -195,7 +195,7 @@ ax.set_xticklabels([str(float(g)) for g in gaps_sorted])
 ax.invert_xaxis()
 ax.set_xlabel('Gap size ε', fontsize=12)
 ax.set_ylabel('Holding cost of the avg iterate', fontsize=12)
-ax.set_title('Fig 9.2 — 5-class multiserver (1000 runs, 95% CI)', fontsize=13)
+ax.set_title('Fig 9.2 — 5-class multiserver (1000 runs, ±1 std dev)', fontsize=13)
 ax.legend(frameon=False, fontsize=8, ncol=2)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()

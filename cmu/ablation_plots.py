@@ -57,7 +57,7 @@ def get_costs_per_gap(data):
 #   X-axis: gap ε (decreasing → right to left via invert)
 #   Y-axis: avg holding cost
 #   Lines : one per ablation value, solid = Pathwise, dashed = REINFORCE
-#   Error bars: 95% CI across 100 runs × 4 alphas
+#   Error bars: ±1 std dev across 100 runs × 4 alphas
 # ─────────────────────────────────────────────────────────────────
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 axes = axes.flatten()
@@ -76,19 +76,19 @@ for idx, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
         rf_by_gap = get_costs_per_gap(rf_data)
 
         pw_means = [np.mean(pw_by_gap[g]) for g in GAPS]
-        pw_ci = [1.96 * np.std(pw_by_gap[g]) / np.sqrt(len(pw_by_gap[g])) for g in GAPS]
+        pw_std = [np.std(pw_by_gap[g]) for g in GAPS]
         rf_means = [np.mean(rf_by_gap[g]) for g in GAPS]
-        rf_ci = [1.96 * np.std(rf_by_gap[g]) / np.sqrt(len(rf_by_gap[g])) for g in GAPS]
+        rf_std = [np.std(rf_by_gap[g]) for g in GAPS]
 
         lbl = AXIS_VAL_FMT[axis_name](val)
         is_baseline = (val == BASELINE[axis_name])
         lw_pw = 3.0 if is_baseline else 2.0
         lw_rf = 2.5 if is_baseline else 1.5
 
-        ax.errorbar(x_pos, pw_means, yerr=pw_ci, marker='s', linestyle='-',
+        ax.errorbar(x_pos, pw_means, yerr=pw_std, marker='s', linestyle='-',
                     linewidth=lw_pw, capsize=4, color=colors[vi],
                     label=f'PW: {lbl}' + (' *' if is_baseline else ''))
-        ax.errorbar(x_pos, rf_means, yerr=rf_ci, marker='o', linestyle='--',
+        ax.errorbar(x_pos, rf_means, yerr=rf_std, marker='o', linestyle='--',
                     linewidth=lw_rf, capsize=4, color=colors[vi], alpha=0.75,
                     label=f'RF: {lbl}' + (' *' if is_baseline else ''))
 
@@ -103,7 +103,7 @@ for idx, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
 
 fig.suptitle(
     'Ablation Analysis — Pathwise (solid) vs REINFORCE (dashed)\n'
-    '(* = baseline setting; error bars = 95% CI)',
+    '(* = baseline setting; error bars = ±1 std dev)',
     fontsize=14, y=1.01
 )
 plt.tight_layout()
@@ -169,7 +169,8 @@ fig, axes = plt.subplots(4, 4, figsize=(20, 16))
 
 for row, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
     n_vals = len(axis_values)
-    colors = cm.viridis(np.linspace(0.15, 0.85, n_vals))
+    pw_colors = cm.Blues(np.linspace(0.4, 0.9, n_vals))
+    rf_colors = cm.Reds(np.linspace(0.4, 0.9, n_vals))
 
     for col, alpha in enumerate(ALPHAS):
         ax = axes[row][col]
@@ -197,16 +198,12 @@ for row, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
             is_baseline = (val == BASELINE[axis_name])
             lw_pw = 2.5 if is_baseline else 1.5
 
-            ax.plot(x_pos, pw_means, marker='s', linestyle='-',
-                    linewidth=lw_pw, color=colors[vi],
-                    label=f'PW {lbl}' if col == 0 else None)
-            ax.fill_between(x_pos, pw_means - pw_std, pw_means + pw_std,
-                            color=colors[vi], alpha=0.15)
-            ax.plot(x_pos, rf_means, marker='o', linestyle='--',
-                    linewidth=lw_pw * 0.7, color=colors[vi], alpha=0.7,
-                    label=f'RF {lbl}' if col == 0 else None)
-            ax.fill_between(x_pos, rf_means - rf_std, rf_means + rf_std,
-                            color=colors[vi], alpha=0.08)
+            ax.errorbar(x_pos, pw_means, yerr=pw_std, marker='s', linestyle='-',
+                        linewidth=lw_pw, capsize=4, color=pw_colors[vi],
+                        label=f'PW {lbl}' if col == 0 else None)
+            ax.errorbar(x_pos, rf_means, yerr=rf_std, marker='o', linestyle='--',
+                        linewidth=lw_pw * 0.7, capsize=4, color=rf_colors[vi],
+                        label=f'RF {lbl}' if col == 0 else None)
 
         ax.set_xticks(x_pos)
         ax.set_xticklabels([str(g) for g in GAPS_FLOAT], fontsize=8)
@@ -222,8 +219,8 @@ for row, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
             ax.set_xlabel('Gap size ε', fontsize=10)
 
 fig.suptitle(
-    'Per-α Ablation: Pathwise (solid) vs REINFORCE (dashed)\n'
-    r'Rows = ablation axis, Columns = learning rate α  (shaded = ±1 std dev)',
+    'Per-α Ablation: Pathwise (solid ■) vs REINFORCE (dashed ●)\n'
+    r'Rows = ablation axis, Columns = learning rate α  (error bars = 95% CI)',
     fontsize=15, y=1.01
 )
 plt.tight_layout()
