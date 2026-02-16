@@ -171,7 +171,7 @@ for alpha in ALPHAS:
         if gap in pw[alpha]:
             pw_costs = np.array([r['avg_cost'] for r in pw[alpha][gap]])
             pw_means.append(np.mean(pw_costs))
-            pw_ci.append(np.std(pw_costs))
+            pw_ci.append(1.96 * np.std(pw_costs) / np.sqrt(len(pw_costs)))
         else:
             pw_means.append(np.nan)
             pw_ci.append(0)
@@ -179,7 +179,7 @@ for alpha in ALPHAS:
         if gap in rf[alpha]:
             rf_costs = np.array([r['avg_cost'] for r in rf[alpha][gap]])
             rf_means.append(np.mean(rf_costs))
-            rf_ci.append(np.std(rf_costs))
+            rf_ci.append(1.96 * np.std(rf_costs) / np.sqrt(len(rf_costs)))
         else:
             rf_means.append(np.nan)
             rf_ci.append(0)
@@ -195,7 +195,7 @@ ax.set_xticklabels([str(float(g)) for g in gaps_sorted])
 ax.invert_xaxis()
 ax.set_xlabel('Gap size ε', fontsize=12)
 ax.set_ylabel('Holding cost of the avg iterate', fontsize=12)
-ax.set_title('Fig 9.2 — 5-class multiserver (1000 runs, ±1 std dev)', fontsize=13)
+ax.set_title('Fig 9.2 — 5-class multiserver (1000 runs, 95% CI)', fontsize=13)
 ax.legend(frameon=False, fontsize=8, ncol=2)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()

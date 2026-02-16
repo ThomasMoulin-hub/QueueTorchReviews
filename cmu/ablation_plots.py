@@ -76,9 +76,9 @@ for idx, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
         rf_by_gap = get_costs_per_gap(rf_data)
 
         pw_means = [np.mean(pw_by_gap[g]) for g in GAPS]
-        pw_std = [np.std(pw_by_gap[g]) for g in GAPS]
+        pw_std = [1.96 * np.std(pw_by_gap[g]) / np.sqrt(len(pw_by_gap[g])) for g in GAPS]
         rf_means = [np.mean(rf_by_gap[g]) for g in GAPS]
-        rf_std = [np.std(rf_by_gap[g]) for g in GAPS]
+        rf_std = [1.96 * np.std(rf_by_gap[g]) / np.sqrt(len(rf_by_gap[g])) for g in GAPS]
 
         lbl = AXIS_VAL_FMT[axis_name](val)
         is_baseline = (val == BASELINE[axis_name])
@@ -103,7 +103,7 @@ for idx, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
 
 fig.suptitle(
     'Ablation Analysis — Pathwise (solid) vs REINFORCE (dashed)\n'
-    '(* = baseline setting; error bars = ±1 std dev)',
+    '(* = baseline setting; error bars = 95% CI)',
     fontsize=14, y=1.01
 )
 plt.tight_layout()
@@ -185,9 +185,9 @@ for row, (axis_name, axis_values) in enumerate(ABLATIONS.items()):
                 pw_c = np.array([r['avg_cost'] for r in pw_data[alpha][gap]])
                 rf_c = np.array([r['avg_cost'] for r in rf_data[alpha][gap]])
                 pw_means.append(np.mean(pw_c))
-                pw_std.append(np.std(pw_c))
+                pw_std.append(1.96 * np.std(pw_c) / np.sqrt(len(pw_c)))
                 rf_means.append(np.mean(rf_c))
-                rf_std.append(np.std(rf_c))
+                rf_std.append(1.96 * np.std(rf_c) / np.sqrt(len(rf_c)))
 
             pw_means = np.array(pw_means)
             pw_std = np.array(pw_std)

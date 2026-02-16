@@ -49,17 +49,17 @@ def load_json(filename):
 
 
 def get_costs(data, alpha, gaps):
-    """Return (means, stds) arrays for a given alpha across gaps."""
-    means, stds = [], []
+    """Return (means, ci95) arrays for a given alpha across gaps."""
+    means, ci = [], []
     for gap in gaps:
         if alpha in data and gap in data[alpha]:
             costs = np.array([r['avg_cost'] for r in data[alpha][gap]])
             means.append(np.mean(costs))
-            stds.append(np.std(costs))
+            ci.append(1.96 * np.std(costs) / np.sqrt(len(costs)))
         else:
             means.append(np.nan)
-            stds.append(0)
-    return means, stds
+            ci.append(0)
+    return means, ci
 
 
 # ── Load all data ──
@@ -130,7 +130,7 @@ for ai, alpha in enumerate(rf_alphas):
         ax.set_ylabel('Holding cost of the avg iterate', fontsize=12)
 
 fig.suptitle(
-    'Per-α: REINFORCE (B=100) vs Pathwise Step Rules — 10-class (±1 std dev)',
+    'Per-α: REINFORCE (B=100) vs Pathwise Step Rules — 10-class (95% CI)',
     fontsize=14, y=1.02
 )
 plt.tight_layout()
@@ -243,7 +243,7 @@ for ri in range(n_rules_total, nrows * ncols):
 
 fig.suptitle(
     'Per-Rule Breakdown — PW (solid) vs RF (dashed) at matching α\n'
-    '10-class, ±1 std dev',
+    '10-class, 95% CI',
     fontsize=14, y=1.02
 )
 plt.tight_layout()

@@ -89,8 +89,10 @@ for alpha in alphas:
             rf10_count += 1
             rf10_cost_list.append(x['avg_cost'])
 
-        pw10_results.append({'alpha':alpha, 'gap': gap, 'avg_cost': np.mean(pw10_cost_list), 'cost_std': np.std(pw10_cost_list)})
-        rf10_results.append({'alpha':alpha, 'gap': gap, 'avg_cost': np.mean(rf10_cost_list), 'cost_std': np.std(rf10_cost_list)})
+        pw_n = len(pw10_cost_list)
+        rf_n = len(rf10_cost_list)
+        pw10_results.append({'alpha':alpha, 'gap': gap, 'avg_cost': np.mean(pw10_cost_list), 'cost_std': 1.96 * np.std(pw10_cost_list) / np.sqrt(pw_n)})
+        rf10_results.append({'alpha':alpha, 'gap': gap, 'avg_cost': np.mean(rf10_cost_list), 'cost_std': 1.96 * np.std(rf10_cost_list) / np.sqrt(rf_n)})
 
 
 fig, ax = plt.subplots(figsize=(7.5, 4.5))

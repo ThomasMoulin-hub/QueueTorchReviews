@@ -26,16 +26,16 @@ def load_json(filename):
 
 
 def get_costs(data, alpha, gaps):
-    means, stds = [], []
+    means, ci = [], []
     for gap in gaps:
         if alpha in data and gap in data[alpha]:
             costs = np.array([r['avg_cost'] for r in data[alpha][gap]])
             means.append(np.mean(costs))
-            stds.append(np.std(costs))
+            ci.append(1.96 * np.std(costs) / np.sqrt(len(costs)))
         else:
             means.append(np.nan)
-            stds.append(0)
-    return np.array(means), np.array(stds)
+            ci.append(0)
+    return np.array(means), np.array(ci)
 
 
 def best_alpha_costs(data, gaps):
@@ -50,8 +50,8 @@ def best_alpha_costs(data, gaps):
             m = np.mean(costs)
             if m < best_mean:
                 best_mean = m
-                sd = np.std(costs)
-                best = (m, sd, alpha)
+                ci = 1.96 * np.std(costs) / np.sqrt(len(costs))
+                best = (m, ci, alpha)
         if best is not None:
             results[gap] = best
     return results
@@ -112,7 +112,7 @@ ax.set_xticklabels([str(g) for g in GAPS_FLOAT])
 ax.invert_xaxis()
 ax.set_xlabel('Gap size ε', fontsize=13)
 ax.set_ylabel('Holding cost of the avg iterate', fontsize=13)
-ax.set_title('K=20 vs K=100: Pathwise Step Rules (best α, ±1 std dev)', fontsize=14)
+ax.set_title('K=20 vs K=100: Pathwise Step Rules (best α, 95% CI)', fontsize=14)
 ax.legend(frameon=False, fontsize=7.5, loc='upper right')
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
@@ -165,7 +165,7 @@ for ri, rule in enumerate(rules):
     ax.legend(fontsize=6, frameon=False, ncol=2)
     ax.grid(True, alpha=0.3)
 
-fig.suptitle('K=100 Per-Rule: PW (solid) vs RF (dashed) at matching α (±1 std dev)', fontsize=14, y=1.02)
+fig.suptitle('K=100 Per-Rule: PW (solid) vs RF (dashed) at matching α (95% CI)', fontsize=14, y=1.02)
 plt.tight_layout()
 plt.savefig(os.path.join(CMU_DIR, 'step_rule_K100_per_rule.png'), dpi=150, bbox_inches='tight')
 plt.close()
@@ -249,7 +249,7 @@ ax.set_xticklabels([str(g) for g in GAPS_FLOAT])
 ax.invert_xaxis()
 ax.set_xlabel('Gap size ε', fontsize=13)
 ax.set_ylabel('Holding cost of the avg iterate', fontsize=13)
-ax.set_title('K=100: All Methods — PW vs RF (best α, ±1 std dev)', fontsize=14)
+ax.set_title('K=100: All Methods — PW vs RF (best α, 95% CI)', fontsize=14)
 ax.legend(frameon=False, fontsize=7, loc='upper right', ncol=2)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
