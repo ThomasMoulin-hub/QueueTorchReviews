@@ -1,8 +1,8 @@
 # Report on Reproducibility Subtleties
 
-This report outlines discrepancies and subtleties encountered when attempting to reproduce the results from the paper.
-
-## 1. Implementation of Policies
+This report outlines discrepancies and subtleties encountered when attempting to reproduce the results from the paper. `Every Figure is reproducible through the reproducing_figs notebook inside the notebooks folder`.
+## Section 5.1 and 5.3
+### 1. Implementation of Policies
 
 The paper provides formulas for `softPriority`, `softMaxWeight`, and `softMaxPressure`. However, the repositories (`queue-learning` and `QueueTorch`) contain a `policy.py` file where these policies are implemented as `nn.Linear` modules from PyTorch, which seems inconsistent with the paper's description.
 
@@ -13,7 +13,7 @@ However, running experiments yields different results compared to those obtained
 
 **Key Observation:** Whether running Experiment 5.1 with the original code or using the policies provided in `policy.py`, the obtained results differ significantly from those reported in the paper.
 
-## 2. Cosine Similarity Measure
+### 2. Cosine Similarity Measure (5.1)
 
 The paper mentions a cosine similarity measure, but this metric does not appear to be implemented in the provided codebase.
 
@@ -23,7 +23,7 @@ Attempts were made to reproduce the figures by:
 
 The results obtained from this process do not match the values indicated in the paper. Furthermore, the specific code used to generate the figures in the paper could not be located.
 
-## 3. Naming Conventions and Configuration Mismatches
+### 3. Naming Conventions and Configuration Mismatches
 
 There are discrepancies between the naming conventions used in the paper and the codebase, particularly regarding the "Reentrant" scenarios.
 
@@ -34,7 +34,7 @@ Additionally, the number of classes differs by a factor of 3 when mapping paper 
 *   Example: `Reentrant-2` with 9 classes in the paper corresponds to `re-reentrant_3` in the codebase.
 
 
-## 4. Comparative Report: DDES Compliance of admission_control (the one I made) vs. buffer_control (the one I suppose was used in part 5.3 leading to figure 11)
+### 4. Comparative Report: DDES Compliance of admission_control (the one I made) vs. buffer_control (the one I suppose was used in part 5.3 leading to figure 11)
 The analysis concludes that admission_control.py aligns with the theoretical requirements of the DDES paper, whereas buffer_control.py maybe contains errors in simulation state management. The latter breaks the mathematical assumptions required for calculating valid pathwise gradients.
 1. Violation of the Augmented State ($s_k$).
 According to Section 3.2 of the DDES paper, the system state is Markovian only if augmented: $s_k=(x_k,z_k)$, where $x_k$ is the queue length and $z_k$ includes auxiliary data (residual inter-arrival times $\tau_{Ak}$ and residual workloads $w_k$).
@@ -48,5 +48,5 @@ The core of the DDES method (Section 4) relies on infinitesimal counterfactual a
    - `admission_control.py` (Valid): It uses a "clipping" mechanism (min$(x_k,L)$) to adjust buffer states without resetting the timeline. This ensures that the sequence of random events (arrivals/service times) remains identical across gradient steps, satisfying the "Reparameterization Trick" requirements.
    - `buffer_control.py` (Invalid): Because it regenerates random times at every step via `reset()`, it effectively creates a "jump" in the trajectory. This breaks the correlation required for differentiation, turning the gradient estimator into a high-variance random walk rather than a precise pathwise derivative.
 
-# 5.Xincan's Contributions
-## Section 5.2 
+
+## Section 5.2 and section 6 
