@@ -11,8 +11,6 @@ and compares the convergence and final costs of both methods.
 
 Usage:
     python admission_control.py --device cpu --num_trials 5 --policy MaxWeight
-
-Author: QueueTorch Team
 """
 
 import argparse

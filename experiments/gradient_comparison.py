@@ -13,8 +13,6 @@ The comparison metric is cosine similarity between the estimated gradient and gr
 
 Usage:
     python gradient_comparison.py --env criss_cross_bh.yaml --horizon 1000 --gt_batch 1000000
-
-Author: QueueTorch Team
 """
 
 import argparse
