@@ -50,3 +50,28 @@ The core of the DDES method (Section 4) relies on infinitesimal counterfactual a
 
 
 ## Section 5.2 and section 6 
+1. Section 5.2
+   - Figure 9 (Left): Stated REINFORCE(B=1000) in the plot, but in the description below stated comparison between PATHWISE(B=1) and REINFORCE(B=100). It's also REINFORCE(B=100) in the paragraph.
+   - Figure 9 (Left): Not clear on whether it's an aggregated result (average) of multiple alphas, or one specific alpha.
+   - Figure 9 (Right): Are error bars std error/ std deviation or Confidence Interval?
+  
+   - $\beta$ used in the softmin operation of PATHWISE for this section, is not clearly specified in paper.
+      - Appendix A stated an inverse temperature of $\beta = 10$ (I assume might be for Section 7?), but would yield bad results (i.e., not able to learn the cmu rule).
+      - Codebase uses a temperature of 1e-6. This would lead to reasonable results where PATHWISE is able to learn the cmu rule with only 1 trajectory.
+
+   - Resultwise, PATHWISE(B=1) and REINFORCE(B=100) seem to have similar performance, unlike in the paper where PATHWISE(B=1) significantly outperforms REINFORCE(B=100).
+  
+3. Section 6
+- PPO-WC:
+    - Q: Is this equation in section 6 accurate?
+      
+      <img src="Section 6/figs_sec6/WC-Softmax_fig.png" width="500" center> 
+      
+        - work-conserving: assigns a probability of zero to empty queues
+            1. if $\epsilon>0$, then when all queue lengths=0, $1 \{ x_l>0 \} \wedge \epsilon =0$, doesn’t prevent division by zero (0/0).
+            2. if $\epsilon<0$, if only $x_j = 0$, then numerator $\pi_\theta^{WC}(x)_{ij} \wedge \epsilon \neq0$, defies WC.        
+      
+    - Code uses
+      <img width="180" height="50" alt="image" src="https://github.com/user-attachments/assets/0b38f4fe-3530-49ef-9412-3030aa3348db" />
+      if not all queues are empty; Otherwise, assign equal weights to each feasible queue.
+
